@@ -1,0 +1,90 @@
+# When controller_manager runs in a namespace (e.g., /bumpy_alpha/controller_manager),
+# it looks for parameters under /bumpy_alpha/controller_manager/...
+# So we structure the parameters with the namespace prefix
+
+# Namespace-aware parameters for bumpy_gamma
+bumpy_gamma:
+  controller_manager:
+    ros__parameters:
+      update_rate: 100  # Hz
+
+      # Controller type definitions
+      joint_state_broadcaster:
+        type: joint_state_broadcaster/JointStateBroadcaster
+
+      bumpy_controller:
+        type: diff_drive_controller/DiffDriveController
+
+      simple_velocity_controller:
+        type: forward_command_controller/ForwardCommandController
+
+  # Hardware interface parameters (not namespaced - read directly by hardware)
+  diffbot_gpio:
+    ros__parameters:
+      kp: 30.0
+      ki: 10.0
+      kd: 0.0
+      left_scale: 15.0
+      right_scale: 15.0
+      left_offset_fwd: 4
+      left_offset_bwd: 0
+      right_offset_fwd: 0
+      right_offset_bwd: 0
+      left_brake_pwm: 255
+      right_brake_pwm: 255
+      pulses_per_rotation: 1400.0
+
+  # Bumpy controller parameters
+  bumpy_controller:
+    ros__parameters:
+      use_stamped_vel: true
+      left_wheel_names: ["left_wheel_joint"]
+      right_wheel_names: ["right_wheel_joint"]
+
+      publish_rate: 100.0
+      pose_covariance_diagonal: [0.001, 0.001, 1.0e-3, 1.0e-3, 1.0e-3, 0.01]
+      twist_covariance_diagonal: [0.001, 0.001, 1.0e-3, 1.0e-3, 1.0e-3, 0.01]
+
+      wheel_separation: 0.0925
+      wheel_radius: 0.022
+
+      wheel_separation_multiplier: 1.0
+      left_wheel_radius_multiplier: 1.0
+      right_wheel_radius_multiplier: 1.0
+
+      cmd_vel_timeout: 0.1
+
+      # Frame IDs - must include full namespace prefix
+      odom_frame_id: bumpy_gamma/odom
+      base_frame_id: bumpy_gamma/base_footprint
+
+      publish_limited_velocity: true
+      publish_wheel_data: true
+      enable_odom_tf: true
+
+      # Velocity and acceleration limits
+      linear.x.has_velocity_limits: true
+      linear.x.max_velocity: 0.7
+      linear.x.min_velocity: -0.7
+      linear.x.has_acceleration_limits: true
+      linear.x.max_acceleration: 0.7
+      linear.x.min_acceleration: -0.7
+      linear.x.has_jerk_limits: false
+      linear.x.max_jerk: 5.0
+
+      angular.z.has_velocity_limits: true
+      angular.z.max_velocity: 8.5
+      angular.z.min_velocity: -8.5
+      angular.z.has_acceleration_limits: true
+      angular.z.max_acceleration: 5.0
+      angular.z.min_acceleration: -5.0
+      angular.z.has_jerk_limits: false
+      angular.z.max_jerk: 2.5
+
+  # Simple velocity controller parameters
+  simple_velocity_controller:
+    ros__parameters:
+      joints:
+        - left_wheel_joint
+        - right_wheel_joint
+      interface_name: velocity

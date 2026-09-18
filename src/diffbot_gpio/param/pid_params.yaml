@@ -1,0 +1,43 @@
+# diffbot_gpio_node parameters
+
+diffbot_gpio_node:
+  ros__parameters:
+
+    # ── Encoder calibration ────────────────────────────────────────────────
+    # Calibrated: 1400 × 4.35 (robot moved 1 m, odom reported 4.35 m at PPR=1400)
+    # Re-calibrate: drive exactly 1 m, then:
+    #   new_ppr = current_ppr × (odom_distance / actual_distance)
+    pulses_per_rotation: 6090.0
+
+    # Encoder direction flags.
+    # Formula: left_ticks_ -= sign * QEM,  right_ticks_ += sign * QEM
+    #   sign=+1 → left inverted, right normal  (CORRECT for this motor wiring)
+    #   sign=-1 → both same-sign for any motion → d_theta=0 → robot appears to go straight only
+    # Set reversed=true ONLY if forward motion still gives negative odom after the sign=1 fix.
+    left_encoder_reversed:  false   # sign = +1
+    right_encoder_reversed: false   # sign = +1
+
+    # Physical dimensions
+    # wheel_separation recalibrated 2026-09: a measured 360° in-place rotation
+    # produced 6.5089 rad (373.0°) of computed heading change at b=0.080.
+    # Corrected b = 0.080 x (6.5089 / 6.28319) ~= 0.0829 m.
+    # Re-verify with a fresh 360° test after applying this and adjust
+    # further if still off by more than ~1%.
+    wheel_radius:     0.022    # metres (44 mm diameter / 2)
+    wheel_separation: 0.0829   # metres — corrected from 0.080 (was ~3.6% low)
+
+    # Control loop rate
+    update_rate_hz: 50.0
+
+    # ── PID ────────────────────────────────────────────────────────────────
+    left_kp: 30.0
+    left_ki: 10.0
+    left_kd:  0.5
+    left_offset_fwd: 0.0
+    left_offset_bwd: 0.0
+
+    right_kp: 30.0
+    right_ki: 10.0
+    right_kd:  0.5
+    right_offset_fwd: 0.0
+    right_offset_bwd: 0.0

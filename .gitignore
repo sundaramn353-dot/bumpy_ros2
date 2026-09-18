@@ -1,0 +1,40 @@
+# ROS 2 / colcon generated files
+build/
+install/
+log/
+
+# Python
+__pycache__/
+*.pyc
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# IDE / editor
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.swp
+*.swo
+*~
+
+# Compiled libraries / binaries
+*.so
+*.a
+*.o
+
+# YDLidar SDK generated files
+src/YDLidar-SDK/build/
+src/YDLidar-SDK/install_local/
+
+# Local backup/archive files
+src/diffbot_bringup.tar.gz
+src/diffbot_bringup/meshes_backup_before_visual/

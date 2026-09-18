@@ -1,0 +1,6 @@
+  <library path="diffbot_gpio">
+    <class
+      name="diffbot_gpio/DiffBotGPIO"
+      type="diffbot_gpio::DiffBotGPIO"
+      base_class_type="hardware_interface::SystemInterface"/>
+  </library>

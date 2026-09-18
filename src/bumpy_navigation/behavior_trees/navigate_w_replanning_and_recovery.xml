@@ -1,0 +1,72 @@
+<!--
+  Bumpy Gamma Navigation Behavior Tree
+  ─────────────────────────────────────────────────────────────────────────────
+  Strategy:
+    1. Navigate to goal using DWB controller + NavFn planner.
+    2. Every 1 s re-plan the global path (handles dynamic obstacles).
+    3. On failure → try Recovery pipeline:
+         a. Clear local costmap
+         b. Wait 2 s for TF / costmap to stabilise
+         c. Spin 1.0 rad to look around
+         d. Back up 0.20 m
+         e. Clear global costmap
+         f. Wait 3 s as final pause
+       Up to 6 recovery attempts before aborting.
+  ─────────────────────────────────────────────────────────────────────────────
+-->
+<root BTCPP_format="4" main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <RecoveryNode number_of_retries="6" name="NavigateRecovery">
+
+      <!-- ── MAIN NAVIGATION PIPELINE ───────────────────────────────────── -->
+      <PipelineSequence name="NavigateWithReplanning">
+
+        <!-- Re-plan global path every 1 second -->
+        <RateController hz="1.0">
+          <RecoveryNode number_of_retries="1" name="ComputePathRecovery">
+            <ComputePathToPose goal="{goal}" path="{path}" planner_id="GridBased"/>
+            <ReactiveFallback name="ComputePathFallback">
+              <GoalUpdated/>
+              <ClearEntireCostmap service_name="global_costmap/clear_entirely_global_costmap"/>
+            </ReactiveFallback>
+          </RecoveryNode>
+        </RateController>
+
+        <!-- Smooth the path -->
+        <SmoothPath path="{path}" smoothed_path="{path}" smoother_id="simple_smoother"/>
+
+        <!-- Follow path, re-plan on new goal or controller failure -->
+        <RecoveryNode number_of_retries="1" name="FollowPathRecovery">
+          <FollowPath path="{path}" controller_id="FollowPath"/>
+          <ReactiveFallback name="FollowPathFallback">
+            <GoalUpdated/>
+            <ClearEntireCostmap service_name="local_costmap/clear_entirely_local_costmap"/>
+          </ReactiveFallback>
+        </RecoveryNode>
+
+      </PipelineSequence>
+
+      <!-- ── RECOVERY PIPELINE ───────────────────────────────────────────── -->
+      <ReactiveFallback name="RecoveryFallback">
+        <GoalUpdated/>
+        <SequenceStar name="RecoveryActions">
+          <!-- 1. Clear local costmap (might be a false obstacle) -->
+          <ClearEntireCostmap name="ClearLocal"
+            service_name="local_costmap/clear_entirely_local_costmap"/>
+          <!-- 2. Wait for TF tree and costmap to stabilise after clear -->
+          <Wait wait_duration="2"/>
+          <!-- 3. Spin ~57° to look around (safe for small robot) -->
+          <Spin spin_dist="1.0"/>
+          <!-- 4. Back up 20 cm -->
+          <BackUp backup_dist="0.20" backup_speed="0.05"/>
+          <!-- 5. Clear global costmap as last resort -->
+          <ClearEntireCostmap name="ClearGlobal"
+            service_name="global_costmap/clear_entirely_global_costmap"/>
+          <!-- 6. Final wait before next retry -->
+          <Wait wait_duration="3"/>
+        </SequenceStar>
+      </ReactiveFallback>
+
+    </RecoveryNode>
+  </BehaviorTree>
+</root>

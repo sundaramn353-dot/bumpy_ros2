@@ -1,0 +1,19 @@
+slam_toolbox:
+  ros__parameters:
+
+    use_sim_time: false
+
+    map_frame: map
+    odom_frame: bumpy_gamma/odom
+    base_frame: bumpy_gamma/base_footprint
+    scan_topic: /scan
+
+    mode: mapping
+
+    resolution: 0.05
+    max_laser_range: 12.0
+    minimum_time_interval: 0.5
+    map_update_interval: 5.0
+
+    transform_publish_period: 0.02
+    transform_timeout: 0.2
